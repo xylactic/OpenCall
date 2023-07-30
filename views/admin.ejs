@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenCall</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+</head>
+
+<body>
+    <!-- OpenCall Admin page -->
+
+    <!-- if error, display at the top as a banner -->
+    <% if (typeof error=="string" ) { %>
+        <div class="alert alert-danger alert-dismissible fade show m-2" role="alert">
+            <strong>
+                <%= error %>
+            </strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <% } %>
+
+            <span id="perms" style="display: none">
+                <%= permissionsStr %>
+            </span>
+
+            <!-- Bootstrap 5 and jquery -->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+                crossorigin="anonymous"></script>
+            <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+            <script defer>
+                let permissions
+                $(document).ready(() => {
+
+                    // get permissions from ejs
+                    permissions = document.getElementById("perms").innerHTML.trim();
+
+                    // convert to array
+                    permissions = permissions.split("&amp;");
+                    // only allow valid permissions (manageEvents, manageUsers)
+                    permissions = permissions.filter(function (permission) {
+                        return permission == "manageEvents" || permission == "manageUsers";
+                    });
+                    // if no permissions, redirect to login
+                    // if (permissions.length == 0) {
+                    //     window.location.href = "/login";
+                    // }
+                    // if manageEvents, show manageEvents div
+                    if (permissions.includes("manageEvents")) {
+                        $("#manageEvents").show();
+                    }
+                    // if manageUsers, show manageUsers div
+                    if (permissions.includes("manageUsers")) {
+                        $("#manageUsers").show();
+                    }
+                })
+
+
+            </script>
+</body>
+
+</html>

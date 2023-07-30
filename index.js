@@ -29,8 +29,20 @@ app.use(session({
     cookie: { secure: false }
 }));
 
+if (!config.adminEmail) {
+    throw new Error('Please set the admin email in the config file.');
+}
+
 // Set up db
 db.prepare('CREATE TABLE IF NOT EXISTS users (email TEXT, password TEXT, fname TEXT, lname TEXT)').run();
+db.prepare('CREATE TABLE IF NOT EXISTS admins (email TEXT, permissions TEXT)').run();
+// insert the admin in the config file into the database if not exists
+const admin = db.prepare('SELECT * FROM admins WHERE email = ?').get(config.adminEmail);
+
+if (!admin) {
+    db.prepare('INSERT INTO admins VALUES (?, ?)').run(config.adminEmail, 'manageUsers&manageEvents');
+}
+
 
 // Set up static files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -103,23 +115,44 @@ app.post('/register', (req, res) => {
 
     if (!password || !fname || !lname || !email) {
         res.render('register', { error: 'Please fill out all fields.' });
+        return
     }
 
     // regex test the email to make sure it's valid
     if (!email.match(/^[^@]+@[^@]+\.[^@]+$/)) {
         res.render('register', { error: 'Please enter a valid email.' });
+        return
     }
 
     const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
     if (user) {
         res.render('register', { error: 'Email already in use.' });
+        return
     }
 
     bcrypt.hash(password, 10, (err, hash) => {
         db.prepare('INSERT INTO users VALUES (?, ?, ?, ?)').run(email, hash, fname, lname);
         res.redirect('/login');
+        return
     });
 });
+
+
+// admin page
+app.get('/admin', (req, res) => {
+    if (req.session.user) {
+        const admin = db.prepare('SELECT * FROM admins WHERE email = ?').get(req.session.user.email);
+        console.log(admin)
+        if (admin) {
+            return res.render('admin', { permissionsStr: admin.permissions });
+        } else {
+            res.redirect('/pb');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+
 
 // Start server
 app.listen(config.port, () => {

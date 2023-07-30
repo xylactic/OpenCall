@@ -1,5 +1,6 @@
 {
     "port": 3000,
     "sessionSecret": "randomsecret123456",
-    "salt": "very salty"
+    "salt": "very salty",
+    "adminEmail": "email@email.com"
 }
