@@ -142,7 +142,6 @@ app.post('/register', (req, res) => {
 app.get('/admin', (req, res) => {
     if (req.session.user) {
         const admin = db.prepare('SELECT * FROM admins WHERE email = ?').get(req.session.user.email);
-        console.log(admin)
         if (admin) {
             return res.render('admin', { permissionsStr: admin.permissions });
         } else {
